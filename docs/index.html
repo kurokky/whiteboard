@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Language" content="ja">
 <meta name="google" content="notranslate">
 <link rel="icon" href="./favicon.ico">
-<title>Web White Board</title>
+<title>Web Whiteboard</title>
 <style>
   *{margin:0;padding:0;}
   aside{
@@ -22,10 +22,11 @@
   .active{background:rgba(255,255,255,0.9);}
   a{color:#000}
   header{
+    display:flex;
   	box-sizing:border-box;
   	height:32px;
   	border-bottom: 1px solid #999;
-  	text-align:center;
+  	/*text-align:center;*/
   	padding:4px;
   }
   header input{
@@ -34,13 +35,16 @@
   header{
   	font-size:10px;
   }
+  header h1{
+    flex:1;
+  }
  .active{
 	background:rgba(0,0,0,0.4);
  }
  main{
   margin-left:32px;
  }
-  iframe{width:100%;border:solid 1px #ccc;width:98%;height:95%;border-top: none}
+  iframe, embed{width:100%;border:solid 1px #ccc;width:98%;height:95%;border-top: none}
 </style>
 <script src="./js/html2canvas.min.js"></script>
 <script type="module" src="https://unpkg.com/x-frame-bypass"></script>
@@ -48,8 +52,9 @@
 </head>
 <body>
 <header>
-URL:<input type="url" name="form_url" id="form_url" placeholder="https://"><span onclick="setUrl()">GO</span> 
-<input type="file" name="form_image" id="form_image" accept="image/*">
+<h1>Web Whiteboard</h1>
+<input type="url" name="form_url" id="form_url" placeholder="https://"><span onclick="setUrl()">GO</span> 
+<input type="file" name="form_image" id="form_image" accept="image/*,application/pdf">
 </header>
 <aside>
 <ul>
@@ -68,7 +73,7 @@ URL:<input type="url" name="form_url" id="form_url" placeholder="https://"><span
 </ul>
 </aside>
 <main>
-<iframe name="mainFrame" src="./base.html"></iframe>
+<embed name="mainFrame" id="mainFrame" src="https://black-tree.net">
 </main>
 </body>
 </html>

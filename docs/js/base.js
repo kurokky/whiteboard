@@ -121,13 +121,15 @@ function setUrl(){
     const url = document.getElementById("form_url").value
     if (url == ""){
         document.querySelector('main').style.background = 'none'
-        document.mainFrame.location.href = "./base.html"
+        //document.mainFrame.location.href = "./base.html"
+        document.getElementById("mainFrame").src = "./base.html"
         return
     }
 
     try{
         document.querySelector('main').style.background = 'none'
-        document.mainFrame.location.href = url
+        //document.mainFrame.location.href = url
+        document.getElementById("mainFrame").src = url
     }catch(err){
         alert("This URL does NOT support Cross Domain")
     }
@@ -242,11 +244,19 @@ function imageCheck(){
     document.getElementById("form_image").addEventListener('change', (event) => {
         const file = event.target.files[0]
         const reader = new FileReader()
+        main.style.backgroundImage = 'none'
+        document.getElementById("mainFrame").src =''
         reader.onload = (e) =>{
             const base64Text = e.currentTarget.result
-            main.style.backgroundImage = `url(${base64Text})`
-            main.style.backgroundSize = "contain"
-            main.style.backgroundRepeat = "no-repeat"
+            if (file.type === "application/pdf"){
+                console.log("pdf")
+                document.getElementById("mainFrame").src = base64Text
+                return
+            }else{
+                main.style.backgroundImage = `url(${base64Text})`
+                main.style.backgroundSize = "contain"
+                main.style.backgroundRepeat = "no-repeat"
+            }
         }
         reader.readAsDataURL(file)
     })
