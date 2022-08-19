@@ -37,7 +37,10 @@
  .active{
 	background:rgba(0,0,0,0.4);
  }
-  iframe{width:100%;border:solid 1px #ccc;width:98%;height:95%;margin-left:32px;border-top: none}
+ main{
+  margin-left:32px;
+ }
+  iframe{width:100%;border:solid 1px #ccc;width:98%;height:95%;border-top: none}
 </style>
 <script src="./js/html2canvas.min.js"></script>
 <script type="module" src="https://unpkg.com/x-frame-bypass"></script>
@@ -45,7 +48,8 @@
 </head>
 <body>
 <header>
-URL:<input type="url" name="form_url" id="form_url" placeholder="https://"><span onclick="setUrl()">GO</span>
+URL:<input type="url" name="form_url" id="form_url" placeholder="https://"><span onclick="setUrl()">GO</span> 
+<input type="file" name="form_image" id="form_image" accept="image/*">
 </header>
 <aside>
 <ul>
@@ -64,7 +68,7 @@ URL:<input type="url" name="form_url" id="form_url" placeholder="https://"><span
 </ul>
 </aside>
 <main>
-</main>
 <iframe name="mainFrame" src="./base.html"></iframe>
+</main>
 </body>
 </html>

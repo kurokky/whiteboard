@@ -22,6 +22,7 @@ window.onload = function () {
     addCanvasTag()
     clickCheck()
     formCheck()
+    imageCheck()
     //setShortCut()
 }
 
@@ -119,11 +120,13 @@ function addCanvasTag(){
 function setUrl(){
     const url = document.getElementById("form_url").value
     if (url == ""){
+        document.querySelector('main').style.background = 'none'
         document.mainFrame.location.href = "./base.html"
         return
     }
 
     try{
+        document.querySelector('main').style.background = 'none'
         document.mainFrame.location.href = url
     }catch(err){
         alert("This URL does NOT support Cross Domain")
@@ -144,6 +147,7 @@ function removeCanvas(){
         context.globalCompositeOperation = 'source-over'
         context.clearRect(0, 0, document.getElementById(canvasDomName).width - 32, document.getElementById(canvasDomName).height - 32)
         removeCheck = false
+        document.querySelector('main').style.background = 'none'
         return
     }
 }
@@ -225,11 +229,25 @@ function clickCheck(){
 }
 
 function formCheck(){
-    const input = document.getElementById("form_url")
-    input.addEventListener('keypress', (e) => {
+    document.getElementById("form_url").addEventListener('keypress', (e) => {
         if (e.keyCode === 13){
             setUrl()
         }
         return false
+    })
+}
+
+function imageCheck(){
+    const main = document.querySelector('main')
+    document.getElementById("form_image").addEventListener('change', (event) => {
+        const [file] = event.target.files
+        if (file){ 
+            const temp_path = URL.createObjectURL(file)
+            main.style.background = `url(${temp_path})`
+            main.style.backgroundSize = "contain"
+            main.style.backgroundRepeat = "no-repeat"
+        }else{
+
+        }
     })
 }
