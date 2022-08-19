@@ -240,14 +240,14 @@ function formCheck(){
 function imageCheck(){
     const main = document.querySelector('main')
     document.getElementById("form_image").addEventListener('change', (event) => {
-        const [file] = event.target.files
-        if (file){ 
-            const temp_path = URL.createObjectURL(file)
-            main.style.background = `url(${temp_path})`
+        const file = event.target.files[0]
+        const reader = new FileReader()
+        reader.onload = (e) =>{
+            const base64Text = e.currentTarget.result
+            main.style.backgroundImage = `url(${base64Text})`
             main.style.backgroundSize = "contain"
             main.style.backgroundRepeat = "no-repeat"
-        }else{
-
         }
+        reader.readAsDataURL(file)
     })
 }
