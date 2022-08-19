@@ -11,6 +11,7 @@ let brushSize = 10
 let colorValue
 let removeCheck =  false
 const canvasDomName = "draw_canvas_html"
+const ua = window.navigator.userAgent.toLowerCase()
 const list = document.getElementsByTagName('li')
 
 const baseKeys = []
@@ -62,6 +63,9 @@ function Draw(e){
     if(!isDraw){
         return
     }
+    if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
+        e.preventDefault()
+    }
     let x = e.offsetX
     let y = e.offsetY
     context.lineCap = "round"
@@ -109,7 +113,6 @@ function addCanvasTag(){
     canvas.height= baseH - 32
 
     isBegin = false
-    const ua = window.navigator.userAgent.toLowerCase()
     if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
         canvas.addEventListener('touchstart', startDraw, false)
         canvas.addEventListener('touchmove', Draw, false)
