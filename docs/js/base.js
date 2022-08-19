@@ -109,9 +109,17 @@ function addCanvasTag(){
     canvas.height= baseH - 32
 
     isBegin = false
-    canvas.addEventListener('mousedown', startDraw, false)
-    canvas.addEventListener('mousemove', Draw, false)
-    canvas.addEventListener('mouseup', endDraw, false)
+    const ua = window.navigator.userAgent.toLowerCase()
+    if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
+        canvas.addEventListener('touchstart', startDraw, false)
+        canvas.addEventListener('touchmove', Draw, false)
+        canvas.addEventListener('touchend', endDraw, false)
+
+    }else{
+        canvas.addEventListener('mousedown', startDraw, false)
+        canvas.addEventListener('mousemove', Draw, false)
+        canvas.addEventListener('mouseup', endDraw, false)
+    }
     context = canvas.getContext('2d')
     context.lineWidth = brushSize
     context.strokeStyle = colorValue
