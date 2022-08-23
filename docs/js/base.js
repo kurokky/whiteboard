@@ -11,7 +11,7 @@ let brushSize = 10
 let colorValue
 let removeCheck =  false
 const canvasDomName = "draw_canvas_html"
-const ua = window.navigator.userAgent.toLowerCase()
+const isPad = checkiPad()
 const list = document.getElementsByTagName('li')
 
 const baseKeys = []
@@ -22,9 +22,19 @@ window.onload = function () {
     setKeyAndValuesFromDom()
     addCanvasTag()
     clickCheck()
-    formCheck()
-    imageCheck()
+    if (document.getElementById("form_url")){
+        formCheck()
+        imageCheck()
+    }
     //setShortCut()
+}
+
+function checkiPad(){
+    const ua = window.navigator.userAgent.toLowerCase()
+    if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
+        return true
+    }
+    return false
 }
 
 
@@ -63,18 +73,25 @@ function Draw(e){
     if(!isDraw){
         return
     }
-    if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
-        e.preventDefault()
-    }
     let x = e.offsetX
     let y = e.offsetY
+    if(isPad){
+        e.preventDefault()
+        const touch = e.touches[0]
+        if (touch.touchType === 'stylus'){
+            x =  e.touches[0].pageX - 26;
+            y =  e.touches[0].pageY - 26;
+        }else{
+            x = e.touches[0].pageX
+            y = e.touches[0].pageY
+        }
+    }
     context.lineCap = "round"
     context.beginPath();
     context.moveTo(gX, gY);
     context.lineTo(x, y);
     context.stroke();
     context.closePath();
-    
     gX = x;
     gY = y;
 }
@@ -113,11 +130,10 @@ function addCanvasTag(){
     canvas.height= baseH - 32
 
     isBegin = false
-    if(ua.indexOf('ipad') > -1 || ua.indexOf('macintosh') > -1 && 'ontouchend' in document){
+    if(isPad){
         canvas.addEventListener('touchstart', startDraw, false)
         canvas.addEventListener('touchmove', Draw, false)
         canvas.addEventListener('touchend', endDraw, false)
-
     }else{
         canvas.addEventListener('mousedown', startDraw, false)
         canvas.addEventListener('mousemove', Draw, false)
