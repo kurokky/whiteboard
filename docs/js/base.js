@@ -49,7 +49,8 @@ function download(){
     //base.js:40 Uncaught (in promise) DOMException: Failed to execute 'toDataURL' on 'HTMLCanvasElement': Tainted canvases may not be exported.
     html2canvas(document.body ,{
         allowTaint: true,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
+        useCORS:true
     }).then(s_canvas => {
         let link = document.createElement("a")
         link.href = s_canvas.toDataURL("image/png")
