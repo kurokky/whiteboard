@@ -12,7 +12,7 @@
   	height:auto;
   	position:absolute;
   	border-right:1px solid #999;
-  	top:0;
+  	top:32px;
   	left:0;
    }
   ul{margin: 0;padding: 0;box-sizing:border-box}
@@ -47,15 +47,16 @@
  }
   iframe, embed{width:100%;border:solid 1px #ccc;width:98%;height:95%;border-top: none}
 </style>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register("./service-worker.jｓ").then(function() { console.log('Service Worker Registered'); });
-}
-</script>
 <script src="./js/html2canvas.min.js"></script>
-<script src="./js/base.js"></script>
+<script type="module" src="https://unpkg.com/x-frame-bypass"></script>
+<script src="./js/base2.js"></script>
 </head>
 <body>
+<header>
+<h1>Web Whiteboard</h1>
+<input type="url" name="form_url" id="form_url" placeholder="https://"><span onclick="setUrl()">GO</span> 
+<input type="file" name="form_image" id="form_image" accept="image/*,application/pdf">
+</header>
 <aside>
 <ul>
   <li data-name="middle" data-value="4" class="brush"><img src="./svg/m.svg" width="24" height="24"></li>
@@ -73,6 +74,7 @@ if ('serviceWorker' in navigator) {
 </ul>
 </aside>
 <main>
+<embed name="mainFrame" id="mainFrame" src="./base.html">
 </main>
 </body>
 </html>

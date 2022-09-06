@@ -211,7 +211,6 @@ function setKeyAndValuesFromDom(){
   }
 }
 
-
 function _toolbarAction(element){
   if (element.dataset.name == "help"){
     return
