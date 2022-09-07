@@ -166,7 +166,7 @@ function Draw(e){
             x =  e.touches[0].pageX - 26
             y =  e.touches[0].pageY - 26
         }else{
-            x = e.touches[0].pageX
+            x = e.touches[0].pageX - 26
             y = e.touches[0].pageY
         }
     }
