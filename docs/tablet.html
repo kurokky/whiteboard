@@ -69,6 +69,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register("./service-worker.jｓ").then(function() { console.log('Service Worker Registered'); });
 }
 </script>
+<script src="./js/shortcut.js"></script>
 <script src="./js/html2canvas.min.js"></script>
 <script src="./js/base.js"></script>
 </head>
@@ -86,6 +87,8 @@ if ('serviceWorker' in navigator) {
   <li data-name="gray"  data-value="rgb(190,190,190)" class="color"><span style="background:rgb(190,190,190);"></span></li>
   <li data-name="red" data-value="rgb(255,0,0)" class="color"><span style="background:rgb(255,0,0)"></span></li>
   <li data-name="green" data-value="rgb(0,255,0)" class="color"><span style="background:rgb(0,255,0)"></span></li>
+  <li data-name="undo" data-value=""><img src="./svg/undo.svg" width="24" height="24"></li>
+  <li data-name="redo" data-value=""><img src="./svg/redo.svg" width="24" height="24"></li>
   <li data-name="delete" data-value="delete" ><img src="./svg/delete.svg" width="24" height="24"></li>
 </ul>
 </aside>

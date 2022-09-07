@@ -11,6 +11,7 @@ let brushSize = 10
 let colorValue
 let removeCheck =  false
 const canvasDomName = "draw_canvas_html"
+const storageKey = "__hisotry"
 const isiPad = checkiPad()
 const isiPhone = checkiPhone()
 const list = document.getElementsByTagName('li')
@@ -18,8 +19,12 @@ const list = document.getElementsByTagName('li')
 const baseKeys = []
 const baseValues = []
 
+const temp_history = []
+let history = localStorage
 
-window.onload = function () {
+
+window.onload = () => {
+    initHistory()
     setKeyAndValuesFromDom()
     addCanvasTag()
     clickCheck()
@@ -27,8 +32,70 @@ window.onload = function () {
         formCheck()
         imageCheck()
     }
-    //setShortCut()
+    setShortCut()
 }
+window.onbeforeunload = () => {
+    localStorage.removeItem(storageKey)
+}
+
+function initHistory(){
+    history.setItem(storageKey, JSON.stringify([]));
+}
+
+function deleteCanvas(){
+    const context = canvas.getContext('2d')
+    context.globalCompositeOperation = 'source-over'
+    context.clearRect(0, 0, document.getElementById(canvasDomName).width - 32, document.getElementById(canvasDomName).height - 32)
+}
+
+
+function setHistory(){
+    const png = document.getElementById(canvasDomName).toDataURL()
+    const histories = JSON.parse(history.getItem(storageKey))
+    //後で調整
+    setTimeout( () =>{
+        histories.unshift({png:png})
+        history.setItem(storageKey, JSON.stringify(histories))
+        temp = []
+    }, 0)
+}
+
+function undo(){
+    const histories = JSON.parse(history.getItem(storageKey))
+    if(histories.length == 0){
+        return
+    }
+    temp_history.unshift(histories.shift());
+    //後で調整
+    setTimeout(function(){
+        history.setItem(storageKey, JSON.stringify(histories))
+        deleteCanvas()
+        reDraw(histories[0]['png'])
+    }, 0)
+}
+
+function redo(){
+    const histories = JSON.parse(history.getItem(storageKey))
+    if(temp_history.length == 0){
+        return
+    }
+    histories.unshift(temp_history.shift())
+    //後で調整
+    setTimeout( () =>{
+        history.setItem(storageKey, JSON.stringify(histories))
+        deleteCanvas()
+        reDraw(histories[0]['png'])
+    }, 0)
+}
+
+function reDraw(src) {
+    const img = new Image()
+    img.src = src
+    img.onload = () => {
+        canvas.getContext('2d').drawImage(img, 0, 0)
+    }
+}
+
 
 function checkiPhone(){
     const ua = window.navigator.userAgent.toLowerCase()
@@ -37,7 +104,6 @@ function checkiPhone(){
     }
     return false
 }
-
 
 function checkiPad(){
     const ua = window.navigator.userAgent.toLowerCase()
@@ -57,12 +123,18 @@ function download(){
     const date = new Date();
     const filename = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) +('0' + date.getDate()).slice(-2) + '_' +  ('0' + date.getHours()).slice(-2) + ('0' + date.getMinutes()).slice(-2)  + ('0' + date.getSeconds()).slice(-2) + "_" + date.getMilliseconds()
     //base.js:40 Uncaught (in promise) DOMException: Failed to execute 'toDataURL' on 'HTMLCanvasElement': Tainted canvases may not be exported.
+     let link = document.createElement("a")
+    if (isiPhone || isiPad){
+        link.href = document.getElementById(canvasDomName).toDataURL("image/png")
+        link.download = `${filename}.png`
+        link.click()
+        downloading = false
+        return
+    }
     html2canvas(document.body ,{
         allowTaint: true,
-        foreignObjectRendering: true,
-        useCORS:true
+        foreignObjectRendering: true
     }).then(s_canvas => {
-        let link = document.createElement("a")
         link.href = s_canvas.toDataURL("image/png")
         link.download = `${filename}.png`
         link.click()
@@ -80,6 +152,7 @@ function startDraw(e){
     gX = e.offsetX
     gY = e.offsetY
 }
+
 function Draw(e){
     if(!isDraw){
         return
@@ -117,6 +190,7 @@ function startDraw(e){
 }
 
 function endDraw(){
+    setHistory()
     isDraw = false
 }
 
@@ -142,15 +216,16 @@ function addCanvasTag(){
     baseH = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
     baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     canvas.width = baseW - 32
-    canvas.height= baseH - 32
     if (isiPhone){
         canvas.height= baseH
         canvas.width = baseW
+    }else{
+        canvas.height= baseH - 32
     }
     isBegin = false
     if(isiPad || isiPhone){
         canvas.addEventListener('touchstart', startDraw, false)
-        canvas.addEventListener('touchmove', Draw, false)
+        canvas.addEventListener('touchmove', Draw,  false)
         canvas.addEventListener('touchend', endDraw, false)
     }else{
         canvas.addEventListener('mousedown', startDraw, false)
@@ -192,7 +267,7 @@ function removeCanvas(){
     } else{
         context = canvas.getContext('2d')
         context.globalCompositeOperation = 'source-over'
-        context.clearRect(0, 0, document.getElementById(canvasDomName).width - 32, document.getElementById(canvasDomName).height - 32)
+        context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
         removeCheck = false
         document.querySelector('main').style.background = 'none'
         return
@@ -229,7 +304,6 @@ function setKeyAndValuesFromDom(){
   }
 }
 
-
 function _toolbarAction(element){
   if (element.dataset.name == "help"){
     return
@@ -247,6 +321,14 @@ function _toolbarAction(element){
     toggleCanvas(element)
     return
   }
+  if ( element.dataset.name == "undo"){
+    undo()
+    return
+  }
+  if ( element.dataset.name == "redo"){
+    redo()
+    return
+  }
   let send_hash = {}
   if ( element.classList.contains('color') == true ){
     document.querySelectorAll('.color').forEach(elm => elm.classList.remove('active'))
@@ -261,6 +343,7 @@ function _toolbarAction(element){
     return
   }
   if ( element.classList.contains('brush') == true ){
+    //console.log("ok")
     document.querySelectorAll('.brush').forEach(elm => elm.classList.remove('active'))
     context.lineWidth = element.dataset.value
     //context.globalCompositeOperation = 'source-over'
@@ -272,11 +355,11 @@ function _toolbarAction(element){
 
 function clickCheck(){
   for(let i = 0; i < list.length; i++){
-    if(isiPad || isiPhone){
+    if (isiPhone || isiPad){
         list[i].addEventListener("touchstart", () =>{
             let element = list[i]
             _toolbarAction(element)
-        })
+        },  {passive: true})
     }else{
         list[i].addEventListener("click", () =>{
             let element = list[i]
@@ -316,4 +399,23 @@ function imageCheck(){
         }
         reader.readAsDataURL(file)
     })
+}
+
+
+function setShortCut(){
+    shortcut.add("Alt+Z", function() {undo()})
+    shortcut.add("Alt+Shift+Z", function() {redo()})
+    shortcut.add("Alt+B", function(){removeCanvas()})
+    shortcut.add("Alt+S", function(){_toolbarAction(list[0])})
+    shortcut.add("Alt+D", function(){_toolbarAction(list[1])})
+    shortcut.add("Alt+F", function(){_toolbarAction(list[2])})
+    shortcut.add("Alt+V", function(){toggleCanvas()})
+    //download はなし
+    shortcut.add("Alt+A", function(){_toolbarAction(list[5])})
+    //black
+    shortcut.add("Alt+Q", function(){_toolbarAction(list[6])})
+    shortcut.add("Alt+W", function(){_toolbarAction(list[7])})
+    shortcut.add("Alt+R", function(){_toolbarAction(list[8])})
+    shortcut.add("Alt+T", function(){_toolbarAction(list[9])})
+    shortcut.add("Alt+G", function(){_toolbarAction(list[10])})
 }
