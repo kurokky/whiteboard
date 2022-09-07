@@ -11,7 +11,8 @@ let brushSize = 10
 let colorValue
 let removeCheck =  false
 const canvasDomName = "draw_canvas_html"
-const isPad = checkiPad()
+const isiPad = checkiPad()
+const isiPhone = checkiPhone()
 const list = document.getElementsByTagName('li')
 
 const baseKeys = []
@@ -28,6 +29,15 @@ window.onload = function () {
     }
     //setShortCut()
 }
+
+function checkiPhone(){
+    const ua = window.navigator.userAgent.toLowerCase()
+    if (ua.indexOf("iphone") > -1){
+        return true
+    }
+    return false
+}
+
 
 function checkiPad(){
     const ua = window.navigator.userAgent.toLowerCase()
@@ -76,25 +86,25 @@ function Draw(e){
     }
     let x = e.offsetX
     let y = e.offsetY
-    if(isPad){
+    if(isiPad || isiPhone){
         e.preventDefault()
         const touch = e.touches[0]
         if (touch.touchType === 'stylus'){
-            x =  e.touches[0].pageX - 26;
-            y =  e.touches[0].pageY - 26;
+            x =  e.touches[0].pageX - 26
+            y =  e.touches[0].pageY - 26
         }else{
             x = e.touches[0].pageX
             y = e.touches[0].pageY
         }
     }
     context.lineCap = "round"
-    context.beginPath();
-    context.moveTo(gX, gY);
-    context.lineTo(x, y);
-    context.stroke();
-    context.closePath();
-    gX = x;
-    gY = y;
+    context.beginPath()
+    context.moveTo(gX, gY)
+    context.lineTo(x, y)
+    context.stroke()
+    context.closePath()
+    gX = x
+    gY = y
 }
 
 function startDraw(e){
@@ -118,7 +128,11 @@ function addCanvasTag(){
     document.body.appendChild(canvasTag)
     canvasTag.id = canvasDomName
     canvasTag.style.position = "absolute"
-    canvasTag.style.top = 32
+    if (isiPhone){
+        canvasTag.style.top = 0
+    }else{
+        canvasTag.style.top = 32
+    }
     canvasTag.style.left = 32
     canvasTag.style.cursor = 'auto'
     canvasTag.style.display = 'block'
@@ -129,9 +143,12 @@ function addCanvasTag(){
     baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     canvas.width = baseW - 32
     canvas.height= baseH - 32
-
+    if (isiPhone){
+        canvas.height= baseH
+        canvas.width = baseW
+    }
     isBegin = false
-    if(isPad){
+    if(isiPad || isiPhone){
         canvas.addEventListener('touchstart', startDraw, false)
         canvas.addEventListener('touchmove', Draw, false)
         canvas.addEventListener('touchend', endDraw, false)
@@ -255,14 +272,17 @@ function _toolbarAction(element){
 
 function clickCheck(){
   for(let i = 0; i < list.length; i++){
-    list[i].addEventListener("click", () =>{
-        let element = list[i]
-        _toolbarAction(element)
-    })
-    list[i].addEventListener("touchstart", () =>{
-        let element = list[i]
-        _toolbarAction(element)
-    })
+    if(isiPad || isiPhone){
+        list[i].addEventListener("touchstart", () =>{
+            let element = list[i]
+            _toolbarAction(element)
+        })
+    }else{
+        list[i].addEventListener("click", () =>{
+            let element = list[i]
+            _toolbarAction(element)
+        })
+    }
   }
 }
 
