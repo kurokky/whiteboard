@@ -270,6 +270,7 @@ function removeCanvas(){
         context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
         removeCheck = false
         document.querySelector('main').style.background = 'none'
+        initHistory()
         return
     }
 }
