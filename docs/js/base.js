@@ -11,6 +11,7 @@ let downloading = false
 let brushSize = 10
 let colorValue
 let removeCheck =  false
+const bgCanvasDomName = "bg_canvas"
 const canvasDomName = "draw_canvas_html"
 const storageKey = "__hisotry"
 const isiPad = checkiPad()
@@ -41,11 +42,47 @@ window.onbeforeunload = () => {
     localStorage.removeItem(storageKey)
 }
 
-//document.getElementById("temp_color").addEventListener("input", updateFirst, false);
+//合成用
+function imageLoaded(img){
+    return new Promise( resolve =>{
+        img.onload = () => resolve()
+        img.onerror = () => resolve()
+    })
+}
+
+//合成
+function mixCanvas(filename){
+    let element = document.createElement("canvas")
+    baseH = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
+    baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    element.width = baseW
+    element.height= baseH
+    const ctx = element.getContext("2d")
+    const images = [new Image(), new Image()]
+    images[0].src = document.getElementById(bgCanvasDomName).toDataURL()
+    images[1].src = document.getElementById(canvasDomName).toDataURL()
+    Promise.all(images.map(imageLoaded)).then(() => {
+        ctx.drawImage(images[0], 0, 0, baseW, baseH)
+        ctx.drawImage(images[1], 0, 0, baseW, baseH)
+        let link = document.createElement("a")
+        link.href = element.toDataURL("image/png")
+        link.download = `${filename}.png`
+        link.click()
+    })
+    return
+}
+
 
 function bgColorPicker(event) {
-    //document.body.style.backgroundColor = event.target.value
-    document.getElementById(canvasDomName).style.backgroundColor = event.target.value
+    const canvas = document.getElementById(bgCanvasDomName)
+    const baseH = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
+    const baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    canvas.width = baseW
+    canvas.height= baseH
+    const bg_ctx = canvas.getContext('2d')
+    bg_ctx.fillStyle = event.target.value
+    bg_ctx.fillRect(0, 0, canvas.width, canvas.height)
+    return
 }
 
 function mainColorPicker(event) {
@@ -71,8 +108,13 @@ function initHistory(){
     history.setItem(storageKey, JSON.stringify([]));
 }
 
+function clearCanvas(){
+    context = canvas.getContext('2d')
+    context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
+}
+
 function deleteCanvas(){
-    const context = canvas.getContext('2d')
+    context = canvas.getContext('2d')
     context.globalCompositeOperation = 'source-over'
     context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
 }
@@ -152,11 +194,9 @@ function download(){
     const date = new Date();
     const filename = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) +('0' + date.getDate()).slice(-2) + '_' +  ('0' + date.getHours()).slice(-2) + ('0' + date.getMinutes()).slice(-2)  + ('0' + date.getSeconds()).slice(-2) + "_" + date.getMilliseconds()
     //base.js:40 Uncaught (in promise) DOMException: Failed to execute 'toDataURL' on 'HTMLCanvasElement': Tainted canvases may not be exported.
-     let link = document.createElement("a")
+    let link = document.createElement("a")
     if (isiPhone || isiPad){
-        link.href = document.getElementById(canvasDomName).toDataURL("image/png")
-        link.download = `${filename}.png`
-        link.click()
+        mixCanvas(filename)
         downloading = false
         return
     }
@@ -293,12 +333,16 @@ function removeCanvas(){
         removeCheck = false
         return false
     } else{
+        //mainの方
         context = canvas.getContext('2d')
         context.globalCompositeOperation = 'source-over'
         context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
         removeCheck = false
         document.getElementById(canvasDomName).style.background = 'none'
-        document.querySelector('main').style.background = 'none'
+
+        const bg_canvas = document.getElementById(bgCanvasDomName)
+        bg_context = bg_canvas.getContext('2d')
+        bg_context.clearRect(0, 0, bg_canvas.width, bg_canvas.height)
         //document.getElementById("temp_color").value = "#000000"
         document.getElementById("bg_color").value = "#ffffff"
         initHistory()
@@ -361,6 +405,10 @@ function _toolbarAction(element){
     return
   }
   if (element.dataset.name == "help"){
+    return
+  }
+  if (element.dataset.name == "clear"){
+    clearCanvas()
     return
   }
   if (element.dataset.name == "delete"){
@@ -460,8 +508,6 @@ function imageCheck(){
 
 function setShortCut(){
     shortcut.add("Alt+O", function() {toggleMenu()})
-    shortcut.add("Alt+Z", function() {undo()})
-    shortcut.add("Alt+Shift+Z", function() {redo()})
     shortcut.add("Alt+B", function(){removeCanvas()})
     shortcut.add("Alt+S", function(){_toolbarAction(list[1])})
     shortcut.add("Alt+D", function(){_toolbarAction(list[2])})
@@ -475,4 +521,9 @@ function setShortCut(){
     shortcut.add("Alt+R", function(){_toolbarAction(list[9])})
     shortcut.add("Alt+T", function(){_toolbarAction(list[10])})
     shortcut.add("Alt+G", function(){_toolbarAction(list[11])})
+    //undo redo
+    shortcut.add("Alt+Z", function() {undo()})
+    shortcut.add("Alt+Shift+Z", function() {redo()})
+    //clear
+    shortcut.add("Alt+C", function(){clearCanvas()})
 }
