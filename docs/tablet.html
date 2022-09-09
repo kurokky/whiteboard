@@ -12,47 +12,56 @@
 <style>
   *{margin:0;padding:0;}
   aside{
-  	width:32px;
-  	height:auto;
-  	position:absolute;
-  	border-right:1px solid #999;
-  	top:0;
-  	left:0;
-   }
+    width:32px;
+    height:auto;
+    position:absolute;
+    border-right:1px solid #999;
+    top:0;
+    left:0;
+    z-index:1010;
+    background:#f9f9f9;
+     }
   ul{margin: 0;padding: 0;box-sizing:border-box}
-  li{margin: 0;padding: 0;list-style:none;padding:4px 4px 0 4px;box-sizing:border-box;border-bottom:1px solid #999}
+  li{margin: 0;padding: 0;list-style:none;padding:4px 4px 0 4px;box-sizing:border-box;border-bottom:1px solid #999;position:relative;height:36px;}
   li img{display:none;}
   li img:first-child{display:inline;}
   span{width:16px;height:16px;border: 0.5px solid #000;display:inline-block;margin:3px}
+  #colors{
+    height:36px;
+  }
   .active{background:rgba(255,255,255,0.9);}
+  #temp_color{
+    width:22px;
+    background: none;
+    border:none;
+    padding:0;
+    position:absolute;
+    left:-1px;
+    top:-1;
+    border:1px solid #999;
+    border-radius:0;
+  }
+  #bg_color{
+    width:22px;
+    background: none;
+    border:none;
+    margin:4px 0 0 7px;
+    border-radius:0;
+  }
   a{color:#000}
-  header{
-    display:flex;
-  	box-sizing:border-box;
-  	height:32px;
-  	border-bottom: 1px solid #999;
-  	/*text-align:center;*/
-  	padding:4px;
-  }
-  header input{
-  	width:300px;
-  }
-  header{
-  	font-size:10px;
-  }
-  header h1{
-    flex:1;
-  }
  .active{
-	background:rgba(0,0,0,0.4);
+  background:rgba(0,0,0,0.4);
  }
  main{
   margin-left:32px;
+  overflow: hidden;
  }
- html {
+ html, body { overflow: hidden; }
+html {
     height  : 100%;
     overflow: hidden;
     position: relative;
+     touch-action: manipulation;
 }
 body {
     height  : 100%;
@@ -76,19 +85,27 @@ if ('serviceWorker' in navigator) {
 <body>
 <aside>
 <ul>
+  <li data-name="menu" data-value="" >
+    <img src="./svg/close.svg" width="24" height="24">
+    <img src="./svg/menu.svg" width="24" height="24">
+  </li>
   <li data-name="middle" data-value="4" class="brush"><img src="./svg/m.svg" width="24" height="24"></li>
   <li data-name="large"  data-value="10" class="active brush"><img src="./svg/l.svg" width="24" height="24"></li>
   <li data-name="xlarge" data-value="20" class="brush"><img src="./svg/xl.svg" width="24" height="24"></li>
   <li data-name="show_hide" data-value="" class="active"><img src="./svg/show.svg" width="24" height="24"><img src="./svg/hide.svg" width="24" height="24"></li>
   <li data-name="save" data-value=""><img src="./svg/save.svg" width="24" height="24"></li>
   <li data-name="erase" data-value="erase" class="color"><img src="./svg/erase.svg" width="24" height="24"></li>
-  <li data-name="black" data-value="rgb(0,0,0)" class="color active"><span style="background:black;"></span></li>
-  <li data-name="white" data-value="rgb(255,255,255)" class="color"><span style="background:rgb(255,255,255)"></span></li>
-  <li data-name="gray"  data-value="rgb(190,190,190)" class="color"><span style="background:rgb(190,190,190);"></span></li>
-  <li data-name="red" data-value="rgb(255,0,0)" class="color"><span style="background:rgb(255,0,0)"></span></li>
-  <li data-name="green" data-value="rgb(0,255,0)" class="color"><span style="background:rgb(0,255,0)"></span></li>
+  <li data-name="black" data-value="#000000" class="color active"><span style="background:#000000"></span></li>
+  <li data-name="white" data-value="#ffffff" class="color"><span style="background:#ffffff"></span></li>
+  <li data-name="gray"  data-value="#bebebe" class="color"><span style="background:#bebebe"></span></li>
+  <li data-name="red" data-value="#ff0000" class="color"><span style="background:#ff0000"></span></li>
+  <li data-name="green" data-value="#00ff00" class="color"><span style="background:#00ff00"></span></li>
   <li data-name="undo" data-value=""><img src="./svg/undo.svg" width="24" height="24"></li>
   <li data-name="redo" data-value=""><img src="./svg/redo.svg" width="24" height="24"></li>
+  <li data-name="temp" data-value="" id="colors">
+    <input type="color" name="temp" id="temp_color" value="#000000">
+    <input type="color" name="temp" id="bg_color" value="#ffffff">
+  </li>
   <li data-name="delete" data-value="delete" ><img src="./svg/delete.svg" width="24" height="24"></li>
 </ul>
 </aside>

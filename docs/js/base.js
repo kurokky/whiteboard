@@ -3,6 +3,7 @@ let gX = 0
 let gY = 0
 let canvas
 let context
+let menuOpen = true
 let isBegin = true
 let baseW
 let baseH
@@ -33,9 +34,37 @@ window.onload = () => {
         imageCheck()
     }
     setShortCut()
+    document.getElementById("temp_color").addEventListener("change", mainColorPicker)
+    document.getElementById("bg_color").addEventListener("change", bgColorPicker)
 }
 window.onbeforeunload = () => {
     localStorage.removeItem(storageKey)
+}
+
+//document.getElementById("temp_color").addEventListener("input", updateFirst, false);
+
+function bgColorPicker(event) {
+    //document.body.style.backgroundColor = event.target.value
+    document.getElementById(canvasDomName).style.backgroundColor = event.target.value
+}
+
+function mainColorPicker(event) {
+    // data-value
+    let elements = document.getElementsByClassName("color")
+    for (i = 0; i < elements.length ; i++){
+        const element = elements[i]
+        if (element.dataset.value == "erase"){
+            continue;
+        }
+        if( !element.classList.contains("active")){
+            continue;
+        }
+        element.dataset.value = event.target.value
+        element.children[0].style.background = event.target.value
+        context.strokeStyle = event.target.value
+    }
+    return
+
 }
 
 function initHistory(){
@@ -45,7 +74,7 @@ function initHistory(){
 function deleteCanvas(){
     const context = canvas.getContext('2d')
     context.globalCompositeOperation = 'source-over'
-    context.clearRect(0, 0, document.getElementById(canvasDomName).width - 32, document.getElementById(canvasDomName).height - 32)
+    context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
 }
 
 
@@ -162,12 +191,10 @@ function Draw(e){
     if(isiPad || isiPhone){
         e.preventDefault()
         const touch = e.touches[0]
+        x =  e.touches[0].pageX - 26
+        y =  e.touches[0].pageY
         if (touch.touchType === 'stylus'){
-            x =  e.touches[0].pageX - 26
-            y =  e.touches[0].pageY - 26
-        }else{
-            x = e.touches[0].pageX - 26
-            y = e.touches[0].pageY
+            y -= 26
         }
     }
     context.lineCap = "round"
@@ -205,9 +232,12 @@ function addCanvasTag(){
     if (isiPhone){
         canvasTag.style.top = 0
     }else{
-        canvasTag.style.top = 32
+        if (document.getElementById("form_url")){
+            canvasTag.style.top = 32
+        }
+        canvasTag.style.top = 0
     }
-    canvasTag.style.left = 32
+    canvasTag.style.left = 0
     canvasTag.style.cursor = 'auto'
     canvasTag.style.display = 'block'
     canvasTag.style.zIndex = 1003
@@ -215,11 +245,9 @@ function addCanvasTag(){
     canvas = document.getElementById(canvasDomName)
     baseH = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
     baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
-    canvas.width = baseW - 32
-    if (isiPhone){
-        canvas.height= baseH
-        canvas.width = baseW
-    }else{
+    canvas.width = baseW
+    canvas.height= baseH
+    if (document.getElementById("form_url")){
         canvas.height= baseH - 32
     }
     isBegin = false
@@ -269,7 +297,10 @@ function removeCanvas(){
         context.globalCompositeOperation = 'source-over'
         context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
         removeCheck = false
+        document.getElementById(canvasDomName).style.background = 'none'
         document.querySelector('main').style.background = 'none'
+        //document.getElementById("temp_color").value = "#000000"
+        document.getElementById("bg_color").value = "#ffffff"
         initHistory()
         return
     }
@@ -296,6 +327,25 @@ function toggleCanvas(element){
     canvas.style.display = "block"
 }
 
+function toggleMenu(){
+    for(let i = 1; i < list.length; i++){
+        if (!menuOpen){
+            list[i].style.display = 'block'
+        }else{
+            list[i].style.display = 'none'
+        }
+    }
+    if (menuOpen){
+        list[0].children[1].style.display = 'block'
+        list[0].children[0].style.display = 'none'
+    }else{
+        list[0].children[0].style.display = 'block'
+        list[0].children[1].style.display = 'none'
+    }
+    menuOpen = !menuOpen
+
+}
+
 
 function setKeyAndValuesFromDom(){
   for(let i = 0; i < list.length; i++){
@@ -306,6 +356,10 @@ function setKeyAndValuesFromDom(){
 }
 
 function _toolbarAction(element){
+  if (element.dataset.name == "menu"){
+    toggleMenu()
+    return
+  }
   if (element.dataset.name == "help"){
     return
   }
@@ -339,6 +393,7 @@ function _toolbarAction(element){
         return
     }
     context.strokeStyle = element.dataset.value
+    document.getElementById("temp_color").value = element.dataset.value
     context.globalCompositeOperation = 'source-over'
     element.classList.add("active")
     return
@@ -404,19 +459,20 @@ function imageCheck(){
 
 
 function setShortCut(){
+    shortcut.add("Alt+O", function() {toggleMenu()})
     shortcut.add("Alt+Z", function() {undo()})
     shortcut.add("Alt+Shift+Z", function() {redo()})
     shortcut.add("Alt+B", function(){removeCanvas()})
-    shortcut.add("Alt+S", function(){_toolbarAction(list[0])})
-    shortcut.add("Alt+D", function(){_toolbarAction(list[1])})
-    shortcut.add("Alt+F", function(){_toolbarAction(list[2])})
+    shortcut.add("Alt+S", function(){_toolbarAction(list[1])})
+    shortcut.add("Alt+D", function(){_toolbarAction(list[2])})
+    shortcut.add("Alt+F", function(){_toolbarAction(list[3])})
     shortcut.add("Alt+V", function(){toggleCanvas()})
     //download はなし
-    shortcut.add("Alt+A", function(){_toolbarAction(list[5])})
+    shortcut.add("Alt+A", function(){_toolbarAction(list[6])})
     //black
-    shortcut.add("Alt+Q", function(){_toolbarAction(list[6])})
-    shortcut.add("Alt+W", function(){_toolbarAction(list[7])})
-    shortcut.add("Alt+R", function(){_toolbarAction(list[8])})
-    shortcut.add("Alt+T", function(){_toolbarAction(list[9])})
-    shortcut.add("Alt+G", function(){_toolbarAction(list[10])})
+    shortcut.add("Alt+Q", function(){_toolbarAction(list[7])})
+    shortcut.add("Alt+W", function(){_toolbarAction(list[8])})
+    shortcut.add("Alt+R", function(){_toolbarAction(list[9])})
+    shortcut.add("Alt+T", function(){_toolbarAction(list[10])})
+    shortcut.add("Alt+G", function(){_toolbarAction(list[11])})
 }
