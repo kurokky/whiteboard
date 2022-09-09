@@ -231,10 +231,11 @@ function Draw(e){
     if(isiPad || isiPhone){
         e.preventDefault()
         const touch = e.touches[0]
-        x =  e.touches[0].pageX - 26
-        y =  e.touches[0].pageY
+        x =  e.touches[0].pageX - 20
+        y =  e.touches[0].pageY + 0
         if (touch.touchType === 'stylus'){
-            y -= 26
+            y = e.touches[0].pageY
+            x = e.touches[0].pageX // 26
         }
     }
     context.lineCap = "round"
