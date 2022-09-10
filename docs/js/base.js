@@ -12,10 +12,11 @@ let brushSize = 10
 let colorValue
 let removeCheck =  false
 const bgCanvasDomName = "bg_canvas"
-const canvasDomName = "draw_canvas_html"
+const mainCanvasDomName = "main_canvas"
 const storageKey = "__hisotry"
 const isiPad = checkiPad()
 const isiPhone = checkiPhone()
+const isAndroid = checkAndroid()
 const list = document.getElementsByTagName('li')
 
 const baseKeys = []
@@ -23,12 +24,10 @@ const baseValues = []
 
 const temp_history = []
 let history = localStorage
-
-
 window.onload = () => {
     initHistory()
     setKeyAndValuesFromDom()
-    addCanvasTag()
+    checkMainCanvas()
     clickCheck()
     if (document.getElementById("form_url")){
         formCheck()
@@ -37,10 +36,32 @@ window.onload = () => {
     setShortCut()
     document.getElementById("temp_color").addEventListener("change", mainColorPicker)
     document.getElementById("bg_color").addEventListener("change", bgColorPicker)
+    if (isAndroid){
+        checkWindowSize()
+    }
 }
+
+
+function checkWindowSize(){
+    window.setTimeout( function() {
+        if (canvas.height != window.document.body.clientHeight){
+            canvas.height = window.document.body.clientHeight
+            canvas.width = window.document.body.clientWidth
+            context.lineWidth = brushSize
+        }
+    }, 500)
+}
+
 window.onbeforeunload = () => {
     localStorage.removeItem(storageKey)
 }
+
+window.oncontextmenu = function(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    return false
+}
+
 
 //合成用
 function imageLoaded(img){
@@ -60,7 +81,7 @@ function mixCanvas(filename){
     const ctx = element.getContext("2d")
     const images = [new Image(), new Image()]
     images[0].src = document.getElementById(bgCanvasDomName).toDataURL()
-    images[1].src = document.getElementById(canvasDomName).toDataURL()
+    images[1].src = document.getElementById(mainCanvasDomName).toDataURL()
     Promise.all(images.map(imageLoaded)).then(() => {
         ctx.drawImage(images[0], 0, 0, baseW, baseH)
         ctx.drawImage(images[1], 0, 0, baseW, baseH)
@@ -82,6 +103,7 @@ function bgColorPicker(event) {
     const bg_ctx = canvas.getContext('2d')
     bg_ctx.fillStyle = event.target.value
     bg_ctx.fillRect(0, 0, canvas.width, canvas.height)
+    document.body.style.background = event.target.value
     return
 }
 
@@ -110,18 +132,18 @@ function initHistory(){
 
 function clearCanvas(){
     context = canvas.getContext('2d')
-    context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
+    context.clearRect(0, 0, document.getElementById(mainCanvasDomName).width, document.getElementById(mainCanvasDomName).height)
 }
 
 function deleteCanvas(){
     context = canvas.getContext('2d')
     context.globalCompositeOperation = 'source-over'
-    context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
+    context.clearRect(0, 0, document.getElementById(mainCanvasDomName).width, document.getElementById(mainCanvasDomName).height)
 }
 
 
 function setHistory(){
-    const png = document.getElementById(canvasDomName).toDataURL()
+    const png = document.getElementById(mainCanvasDomName).toDataURL()
     const histories = JSON.parse(history.getItem(storageKey))
     //後で調整
     setTimeout( () =>{
@@ -187,9 +209,17 @@ function checkiPad(){
     return false
 }
 
+function checkAndroid(){
+    const ua = window.navigator.userAgent.toLowerCase()
+    if (ua.indexOf("android") > -1){
+        return true
+    }
+    return false
+}
+
 
 function download(){
-    if (!document.getElementById(canvasDomName)){
+    if (!document.getElementById(mainCanvasDomName)){
         alert('can not find draw')
         return false
     }
@@ -265,34 +295,17 @@ function endDraw(){
     isDraw = false
 }
 
-function addCanvasTag(){
-    if (document.getElementById(canvasDomName)){
-        return false
+function checkMainCanvas(){
+    canvas = document.getElementById(mainCanvasDomName)
+    if (!isiPhone && document.getElementById("form_url")){
+        canvas.style.top = 32
     }
-    const canvasTag = document.createElement('canvas')
-    document.body.appendChild(canvasTag)
-    canvasTag.id = canvasDomName
-    canvasTag.style.position = "absolute"
-    if (isiPhone){
-        canvasTag.style.top = 0
-    }else{
-        if (document.getElementById("form_url")){
-            canvasTag.style.top = 32
-        }
-        canvasTag.style.top = 0
-    }
-    canvasTag.style.left = 0
-    canvasTag.style.cursor = 'auto'
-    canvasTag.style.display = 'block'
-    canvasTag.style.zIndex = 1003
-
-    canvas = document.getElementById(canvasDomName)
     baseH = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
     baseW = Math.max.apply( null, [document.body.clientWidth , document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     canvas.width = baseW
     canvas.height= baseH
     if (document.getElementById("form_url")){
-        canvas.height= baseH - 32
+        canvas.height = baseH - 32
     }
     isBegin = false
     if(isiPad || isiPhone){
@@ -340,13 +353,15 @@ function removeCanvas(){
         //mainの方
         context = canvas.getContext('2d')
         context.globalCompositeOperation = 'source-over'
-        context.clearRect(0, 0, document.getElementById(canvasDomName).width, document.getElementById(canvasDomName).height)
+        context.clearRect(0, 0, document.getElementById(mainCanvasDomName).width, document.getElementById(mainCanvasDomName).height)
         removeCheck = false
-        document.getElementById(canvasDomName).style.background = 'none'
-
+        document.getElementById(mainCanvasDomName).style.background = 'none'
+        //bgの方
         const bg_canvas = document.getElementById(bgCanvasDomName)
         bg_context = bg_canvas.getContext('2d')
         bg_context.clearRect(0, 0, bg_canvas.width, bg_canvas.height)
+        document.body.style.background = 'none'
+
         //document.getElementById("temp_color").value = "#000000"
         document.getElementById("bg_color").value = "#ffffff"
         initHistory()
@@ -356,19 +371,16 @@ function removeCanvas(){
 
 
 function toggleCanvas(element){
-    //alert(1)
-    if (!document.getElementById(canvasDomName)){
-        return false
-    }
-    if (document.getElementById(canvasDomName).style.zIndex == 1003){
-        document.getElementById(canvasDomName).style.zIndex = -100
-        document.getElementById(canvasDomName).style.display = "none"
+    const mainCanvas = document.getElementById(mainCanvasDomName)
+    if (mainCanvas.style.zIndex == 1003){
+        mainCanvas.style.zIndex = -100
+        mainCanvas.style.display = "none"
         element.classList.remove("active")
         element.children[0].style.display = 'none'
         element.children[1].style.display = 'inline'
         return
     }
-    document.getElementById(canvasDomName).style.zIndex = 1003
+    mainCanvas.style.zIndex = 1003
     element.classList.add("active")
     element.children[0].style.display = 'inline'
     element.children[1].style.display = 'none'
@@ -516,14 +528,14 @@ function setShortCut(){
     shortcut.add("Alt+S", function(){_toolbarAction(list[1])})
     shortcut.add("Alt+D", function(){_toolbarAction(list[2])})
     shortcut.add("Alt+F", function(){_toolbarAction(list[3])})
-    shortcut.add("Alt+V", function(){toggleCanvas()})
+    shortcut.add("Alt+V", function(){toggleCanvas(list[4])})
     //download はなし
     shortcut.add("Alt+A", function(){_toolbarAction(list[6])})
     //black
     shortcut.add("Alt+Q", function(){_toolbarAction(list[7])})
     shortcut.add("Alt+W", function(){_toolbarAction(list[8])})
-    shortcut.add("Alt+R", function(){_toolbarAction(list[9])})
-    shortcut.add("Alt+T", function(){_toolbarAction(list[10])})
+    shortcut.add("Alt+E", function(){_toolbarAction(list[9])})
+    shortcut.add("Alt+R", function(){_toolbarAction(list[10])})
     shortcut.add("Alt+G", function(){_toolbarAction(list[11])})
     //undo redo
     shortcut.add("Alt+Z", function() {undo()})
