@@ -4,7 +4,7 @@
   "theme_color": "#fff",
   "background_color": "#fff",
   "display": "standalone",
-  "start_url": "./baby.html",
+  "start_url": "./child.html",
   "icons": [
     {
       "src": "./icon.png",
