@@ -173,6 +173,9 @@ function checkiPhone(){
     if (ua.indexOf("iphone") > -1){
         return true
     }
+    if (ua.indexOf("android") > -1){
+        return true
+    }
     return false
 }
 
